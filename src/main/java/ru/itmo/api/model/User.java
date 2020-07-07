@@ -1,11 +1,10 @@
-package ru.itmo.api;
+package ru.itmo.api.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,21 +13,19 @@ import javax.persistence.Table;
 
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="users")
+@Table(name="spring_users")
 public class User {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
     private String name;
     private String email;
-    private String gender;
-    private String status;
-
-    public User() { }
+    private Gender gender;
+    private Status status;
 
 }
