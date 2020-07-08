@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.itmo.api.dto.StatisticsDTO;
 import ru.itmo.api.dto.UserDTO;
 import ru.itmo.api.service.UserService;
 import ru.itmo.api.exception.BadRequestException;
@@ -56,19 +58,13 @@ public class UserController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserDTO getUser(@PathVariable("id") int id) {
-        Optional<User> user = userService.getUser(id);
-        if (user.isEmpty()) {
-            throw new ResourceNotFoundException(String.format("Can not find user with id %d", id));
-        }
-        return new UserDTO(user.get());
+        return new UserDTO(userService.getUser(id));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteUser(@PathVariable int id) {
-        if (!userService.deleteUserById(id)) {
-            throw new ResourceNotFoundException(String.format("Can not find user with id %d", id));
-        }
+        userService.deleteUserById(id);
     }
 
     @PutMapping("/{id}")
@@ -78,9 +74,12 @@ public class UserController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "gender", required = false) String gender) {
-        if (!userService.updateUserById(id, name, email, gender)) {
-            throw new ResourceNotFoundException(String.format("Can not find user with id %d", id));
-        }
+        userService.updateUserById(id, name, email, gender);
+    }
+
+    @PutMapping("/change-status/{id}")
+    public void changeUserStatus(@PathVariable int id, @RequestParam("status") String status) {
+        userService.changeUserStatus(id, status);
     }
 
 }

@@ -3,6 +3,7 @@ package ru.itmo.api.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.itmo.api.exception.BadRequestException;
+import ru.itmo.api.exception.ResourceNotFoundException;
 import ru.itmo.api.repository.UserRepository;
 import ru.itmo.api.model.Gender;
 import ru.itmo.api.model.Status;
@@ -23,25 +24,28 @@ public class UserService {
         return userRepository.save(user).getId();
     }
 
-    public Optional<User> getUser(Integer id) {
-        return userRepository.findById(id);
+    public User getUser(Integer id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException(String.format("Can not find user with id %d", id));
+        }
+        return user.get();
     }
 
     public List<User> getUsers() {
         return userRepository.findAll();
     }
 
-    public boolean deleteUserById(int id) {
+    public void deleteUserById(int id) {
         if (!userRepository.existsById(id)) {
-            return false;
+            throw new ResourceNotFoundException(String.format("Can not find user with id %d", id));
         }
         userRepository.deleteById(id);
-        return true;
     }
 
-    public boolean updateUserById(int id, String name, String email, String gender) {
+    public void updateUserById(int id, String name, String email, String gender) {
         if (!userRepository.existsById(id)) {
-            return false;
+            throw new ResourceNotFoundException(String.format("Can not find user with id %d", id));
         }
         User userFromDb = userRepository.findById(id).get();
         if (name != null) {
@@ -58,7 +62,23 @@ public class UserService {
             }
         }
         userRepository.save(userFromDb);
-        return true;
+    }
+
+    public void changeUserStatus(Integer id, String status) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Can not find user");
+        }
+        if (status == null) {
+            throw new BadRequestException("Status must not be void");
+        }
+        User userFromDb = userRepository.findById(id).get();
+        try {
+            userFromDb.setStatus(Status.valueOf(status.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+        userRepository.save(userFromDb);
+        // TODO: add to logger
     }
 
 }
