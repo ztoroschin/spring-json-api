@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.itmo.api.exception.BadRequestException;
 import ru.itmo.api.exception.ResourceNotFoundException;
-import ru.itmo.api.repository.UserRepository;
 import ru.itmo.api.model.Gender;
+import ru.itmo.api.model.StatisticsEntry;
 import ru.itmo.api.model.Status;
 import ru.itmo.api.model.User;
+import ru.itmo.api.repository.StatisticsRepository;
+import ru.itmo.api.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +20,9 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private final StatisticsRepository statisticsRepository;
+
     public int addUser(String name, String email, String gender, String status) {
-        // TODO: check existence of name, email
         User user = new User(null, name, email, Gender.valueOf(gender.toUpperCase()), Status.valueOf(status.toUpperCase()));
         return userRepository.save(user).getId();
     }
@@ -78,7 +81,15 @@ public class UserService {
             throw new BadRequestException(e.getMessage());
         }
         userRepository.save(userFromDb);
-        // TODO: add to logger
+
+        Status statusEnum;
+        try {
+            statusEnum = Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+        StatisticsEntry statisticsEntry = new StatisticsEntry(id, statusEnum);
+        statisticsRepository.save(statisticsEntry);
     }
 
 }

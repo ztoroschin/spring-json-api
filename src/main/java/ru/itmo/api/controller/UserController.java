@@ -7,21 +7,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.itmo.api.dto.StatisticsDTO;
 import ru.itmo.api.dto.UserDTO;
-import ru.itmo.api.service.UserService;
 import ru.itmo.api.exception.BadRequestException;
-import ru.itmo.api.exception.ResourceNotFoundException;
-import ru.itmo.api.model.User;
+import ru.itmo.api.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -73,11 +68,13 @@ public class UserController {
             @PathVariable int id,
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
-            @RequestParam(value = "gender", required = false) String gender) {
+            @RequestParam(value = "gender", required = false) String gender
+    ) {
         userService.updateUserById(id, name, email, gender);
     }
 
     @PutMapping("/change-status/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
     public void changeUserStatus(@PathVariable int id, @RequestParam("status") String status) {
         userService.changeUserStatus(id, status);
     }
